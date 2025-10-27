@@ -1,14 +1,14 @@
 const Room = require('../models/rooms.model');
 
 module.exports.index = async (req, res) => {
-    const result = await Room.find({});
+    try {
+        const result = await Room.find({});
+        res.json(result); 
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
-    res.json({
-        res: result,
-    });
-
-
-}
 
 module.exports.roomDetail = async (req, res) => {
     const id = req.query.room_id;
