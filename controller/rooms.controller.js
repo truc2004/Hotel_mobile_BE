@@ -19,9 +19,5 @@ module.exports.roomDetail = async (req, res) => {
         room_id: id
     })
 
-    res.json({
-        res: result,
-    });
-
-
+   res.json(result[0] || null);
 }
