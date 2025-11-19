@@ -27,6 +27,8 @@ const RoomSchema = new mongoose.Schema({
         type: Date,
     },
     updated_at: Date,
+    rate: Number,
+    bed_count: Number
 }, {
     timestamps: true
 });
