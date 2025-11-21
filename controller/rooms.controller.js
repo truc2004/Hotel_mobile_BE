@@ -19,3 +19,4 @@ module.exports.roomDetail = async (req, res) => {
 
    res.json(result[0] || null);
 }
+

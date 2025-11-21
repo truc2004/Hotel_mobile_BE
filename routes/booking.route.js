@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/bookings.model");
 const { v4: uuidv4 } = require("uuid");
+const controller = require("../controller/booking.controller");
 
 router.post("/", async (req, res) => {
   try {
@@ -23,7 +24,7 @@ router.post("/", async (req, res) => {
       room_price: data.room_price,
       total_price: data.total_price,
       note: data.note,
-      status: data.status || "PAID",
+      status: data.status || "upcoming",
       // created_at / updated_at để timestamps lo
     });
 
@@ -38,5 +39,9 @@ router.post("/", async (req, res) => {
       .json({ message: "Lỗi tạo booking", error: err.message });
   }
 });
+
+router.get("/by-account/:account_id", controller.getBookingsByAccount);
+router.get("/:booking_id", controller.getBookingById);
+
 
 module.exports = router;
