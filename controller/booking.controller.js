@@ -1,5 +1,47 @@
 // controller/booking.controller.js
 const Booking = require("../models/bookings.model");
+const { v4: uuidv4 } = require("uuid");
+const { sendBookingReceiptEmail } = require("../utils/mailer");
+
+async function createBooking(req, res) {
+  try {
+    console.log(">>> [createBooking] HIT");
+    console.log("Incoming booking body:", req.body);
+
+    const data = req.body;
+
+    const booking = new Booking({
+      booking_id: uuidv4(),
+      account_id: data.account_id || null,
+      room_id: data.room_id,
+      user_booking_info: data.user_booking_info,
+      hotel_info: data.hotel_info,
+      num_adults: data.num_adults,
+      num_children: data.num_children,
+      booking_date: data.booking_date || new Date(),
+      extra_fee: data.extra_fee,
+      room_price: data.room_price,
+      total_price: data.total_price,
+      note: data.note,
+      status: data.status || "upcoming",
+    });
+
+    const saved = await booking.save();
+    console.log(">>> [createBooking] saved booking_id =", saved.booking_id);
+    console.log(">>> [createBooking] saved email =", saved.user_booking_info?.email);
+
+    console.log(">>> [createBooking] about to call sendBookingReceiptEmail");
+    await sendBookingReceiptEmail(saved);
+    console.log(">>> [createBooking] sendBookingReceiptEmail DONE");
+
+    return res.status(201).json(saved);
+  } catch (err) {
+    console.error("Booking save error:", err);
+    return res
+      .status(500)
+      .json({ message: "Lỗi tạo booking", error: err.message });
+  }
+}
 
 
 async function getBookingsByAccount(req, res) {
@@ -47,5 +89,6 @@ async function getBookingById(req, res) {
 
 module.exports = {
   getBookingsByAccount,
-  getBookingById
+  getBookingById,
+  createBooking
 };
