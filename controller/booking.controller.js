@@ -5,9 +5,6 @@ const { sendBookingReceiptEmail } = require("../utils/mailer");
 
 async function createBooking(req, res) {
   try {
-    console.log(">>> [createBooking] HIT");
-    console.log("Incoming booking body:", req.body);
-
     const data = req.body;
 
     const booking = new Booking({
@@ -27,12 +24,8 @@ async function createBooking(req, res) {
     });
 
     const saved = await booking.save();
-    console.log(">>> [createBooking] saved booking_id =", saved.booking_id);
-    console.log(">>> [createBooking] saved email =", saved.user_booking_info?.email);
-
-    console.log(">>> [createBooking] about to call sendBookingReceiptEmail");
+  
     await sendBookingReceiptEmail(saved);
-    console.log(">>> [createBooking] sendBookingReceiptEmail DONE");
 
     return res.status(201).json(saved);
   } catch (err) {
@@ -86,9 +79,30 @@ async function getBookingById(req, res) {
   }
 }
 
+async function getBookingsByRoom(req, res) {
+  try {
+    const { room_id } = req.params;
+
+    if (!room_id) {
+      return res.status(400).json({ message: "room_id is required" });
+    }
+
+    // Lấy tất cả booking của phòng này, chỉ lấy những trạng thái còn hiệu lực
+    const bookings = await Booking.find({
+      room_id,
+    }).select("booking_id check_in_date check_out_date");
+
+    return res.json(bookings);
+  } catch (err) {
+    console.error("getBookingsByRoom error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 
 module.exports = {
   getBookingsByAccount,
   getBookingById,
-  createBooking
+  createBooking,
+  getBookingsByRoom
 };
