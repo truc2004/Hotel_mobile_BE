@@ -9,6 +9,7 @@ router.post("/", controller.createBooking);
 router.get("/by-account/:account_id", controller.getBookingsByAccount);
 router.get("/:booking_id", controller.getBookingById);
 router.get("/by-room/:room_id", controller.getBookingsByRoom); 
+router.patch("/:booking_id/cancel", controller.cancelBooking);
 
 
 module.exports = router;

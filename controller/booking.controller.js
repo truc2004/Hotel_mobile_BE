@@ -1,7 +1,7 @@
 // controller/booking.controller.js
 const Booking = require("../models/bookings.model");
 const { v4: uuidv4 } = require("uuid");
-const { sendBookingReceiptEmail } = require("../utils/mailer");
+const { sendBookingReceiptEmail, sendCancelBookingEmail } = require("../utils/mailer");
 
 async function createBooking(req, res) {
   try {
@@ -16,6 +16,8 @@ async function createBooking(req, res) {
       num_adults: data.num_adults,
       num_children: data.num_children,
       booking_date: data.booking_date || new Date(),
+       check_in_date: data.check_in_date ? new Date(data.check_in_date) : null,
+      check_out_date: data.check_out_date ? new Date(data.check_out_date) : null,
       extra_fee: data.extra_fee,
       room_price: data.room_price,
       total_price: data.total_price,
@@ -24,7 +26,7 @@ async function createBooking(req, res) {
     });
 
     const saved = await booking.save();
-  
+
     await sendBookingReceiptEmail(saved);
 
     return res.status(201).json(saved);
@@ -87,10 +89,9 @@ async function getBookingsByRoom(req, res) {
       return res.status(400).json({ message: "room_id is required" });
     }
 
-    // Lấy tất cả booking của phòng này, chỉ lấy những trạng thái còn hiệu lực
-    const bookings = await Booking.find({
-      room_id,
-    }).select("booking_id check_in_date check_out_date");
+    // Lấy tất cả booking của phòng này, chỉ lấy những trường cần dùng
+    const bookings = await Booking.find({ room_id })
+      .select("booking_id check_in_date check_out_date status");
 
     return res.json(bookings);
   } catch (err) {
@@ -100,9 +101,52 @@ async function getBookingsByRoom(req, res) {
 }
 
 
+async function cancelBooking(req, res) {
+  try {
+    const { booking_id } = req.params;
+    const { reason } = req.body; // text lý do từ FE
+
+    console.log("booking_id =", booking_id);        
+
+    if (!booking_id) {
+      return res.status(400).json({ message: "booking_id is required" });
+    }
+
+    const booking = await Booking.findOne({ booking_id });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.status === "cancelled") {
+      return res.status(400).json({ message: "Booking already cancelled" });
+    }
+
+    booking.status = "cancelled";
+    await booking.save();
+
+    // Gửi email hủy (không chặn response nếu lỗi mail)
+    if (typeof sendCancelBookingEmail === "function") {
+      sendCancelBookingEmail(booking, reason || "").catch((err) =>
+        console.error("sendCancelBookingEmail error:", err)
+      );
+    }
+
+    return res.json({
+      message: "Booking cancelled successfully",
+      booking,
+    });
+  } catch (err) {
+    console.error("cancelBooking error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 module.exports = {
   getBookingsByAccount,
   getBookingById,
   createBooking,
-  getBookingsByRoom
+  getBookingsByRoom,
+  cancelBooking,
 };
+

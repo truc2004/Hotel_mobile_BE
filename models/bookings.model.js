@@ -35,11 +35,13 @@ const BookingSchema = new mongoose.Schema({
     room_price: Number,
     total_price: Number,
     note: String,
-    status: String, 
-      created_at: {
+    status: String,
+    created_at: {
         type: Date,
     },
     updated_at: Date,
+    check_in_date: Date,
+    check_out_date: Date,
 }, {
     timestamps: true
 });
