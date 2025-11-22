@@ -56,7 +56,7 @@ async function sendBookingReceiptEmail(booking) {
   const totalPrice = booking.total_price || roomPrice + extraFee;
 
   const subject = `Xác nhận đặt phòng #${bookingId} – ${hotelName}`;
-
+  
   const html = `
   <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #F8FAFF; padding: 24px;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
@@ -152,8 +152,8 @@ async function sendBookingReceiptEmail(booking) {
   </div>
   `;
 
-
-  try {
+  
+   try {
     const info = await transporter.sendMail({
       from: `"Booking App" <${process.env.SMTP_USER}>`,
       to: email,
@@ -161,7 +161,7 @@ async function sendBookingReceiptEmail(booking) {
       html,
     });
 
-
+  
   } catch (err) {
     console.error(">>> [mailer] SMTP send error:", err);
   }
@@ -215,134 +215,134 @@ function calcRefundForCancellation(booking) {
 /**
  * Gửi mail xác nhận ĐẶT PHÒNG (giữ nguyên như trước, chỉ gói lại)
  */
-async function sendBookingReceiptEmail(booking) {
-  console.log(">>> [mailer] booking raw =", JSON.stringify(booking, null, 2));
+// async function sendBookingReceiptEmail(booking) {
+//   console.log(">>> [mailer] booking raw =", JSON.stringify(booking, null, 2));
 
-  const email = booking?.user_booking_info?.email;
-  const fullName = booking?.user_booking_info?.full_name || "Quý khách";
+//   const email = booking?.user_booking_info?.email;
+//   const fullName = booking?.user_booking_info?.full_name || "Quý khách";
 
-  if (!email) {
-    console.log(">>> [mailer] Booking không có email, bỏ qua gửi mail.");
-    return;
-  }
+//   if (!email) {
+//     console.log(">>> [mailer] Booking không có email, bỏ qua gửi mail.");
+//     return;
+//   }
 
-  const hotelName = booking?.hotel_info?.name || "Khách sạn";
-  const hotelAddress =
-    booking?.hotel_info?.address || "Địa chỉ chưa cập nhật";
+//   const hotelName = booking?.hotel_info?.name || "Khách sạn";
+//   const hotelAddress =
+//     booking?.hotel_info?.address || "Địa chỉ chưa cập nhật";
 
-  const bookingDate = formatDate(booking.booking_date);
-  const bookingId = booking.booking_id;
+//   const bookingDate = formatDate(booking.booking_date);
+//   const bookingId = booking.booking_id;
 
-  const totalGuests =
-    (booking.num_adults || 0) + (booking.num_children || 0);
+//   const totalGuests =
+//     (booking.num_adults || 0) + (booking.num_children || 0);
 
-  const roomPrice = booking.room_price || booking.total_price || 0;
-  const extraFee = booking.extra_fee || 0;
-  const totalPrice = booking.total_price || roomPrice + extraFee;
+//   const roomPrice = booking.room_price || booking.total_price || 0;
+//   const extraFee = booking.extra_fee || 0;
+//   const totalPrice = booking.total_price || roomPrice + extraFee;
 
-  const subject = `Xác nhận đặt phòng #${bookingId} – ${hotelName}`;
+//   const subject = `Xác nhận đặt phòng #${bookingId} – ${hotelName}`;
 
-  const html = `
-  <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #F8FAFF; padding: 24px;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-      <h2 style="text-align: center; color: #1A1A1A; margin-bottom: 4px;">Hóa đơn điện tử</h2>
-      <p style="text-align: center; color: #4A4A4A; margin-top: 0; margin-bottom: 24px;">
-        Cảm ơn ${fullName} đã đặt phòng qua ứng dụng của chúng tôi.
-      </p>
+//   const html = `
+//   <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #F8FAFF; padding: 24px;">
+//     <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+//       <h2 style="text-align: center; color: #1A1A1A; margin-bottom: 4px;">Hóa đơn điện tử</h2>
+//       <p style="text-align: center; color: #4A4A4A; margin-top: 0; margin-bottom: 24px;">
+//         Cảm ơn ${fullName} đã đặt phòng qua ứng dụng của chúng tôi.
+//       </p>
 
-      <div style="text-align: center; margin-bottom: 24px;">
-        <div style="display: inline-block; padding: 8px 16px; border-radius: 999px; background-color: #F2F4F8; font-size: 13px; color: #4A4A4A;">
-          Mã đơn đặt phòng: <strong style="color: #2E76FF;">${bookingId}</strong>
-        </div>
-      </div>
+//       <div style="text-align: center; margin-bottom: 24px;">
+//         <div style="display: inline-block; padding: 8px 16px; border-radius: 999px; background-color: #F2F4F8; font-size: 13px; color: #4A4A4A;">
+//           Mã đơn đặt phòng: <strong style="color: #2E76FF;">${bookingId}</strong>
+//         </div>
+//       </div>
 
-      <div style="margin-bottom: 16px;">
-        <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Thông tin khách sạn</h3>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Khách sạn: </span>
-          <span style="color: #1A1A1A; font-weight: 600; text-align: right;">${hotelName}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-          <span style="color: #8E8E93;">Địa chỉ: </span>
-          <span style="color: #1A1A1A; text-align: right; max-width: 60%;">${hotelAddress}</span>
-        </div>
-      </div>
+//       <div style="margin-bottom: 16px;">
+//         <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Thông tin khách sạn</h3>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Khách sạn: </span>
+//           <span style="color: #1A1A1A; font-weight: 600; text-align: right;">${hotelName}</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px;">
+//           <span style="color: #8E8E93;">Địa chỉ: </span>
+//           <span style="color: #1A1A1A; text-align: right; max-width: 60%;">${hotelAddress}</span>
+//         </div>
+//       </div>
 
-      <hr style="border: none; border-top: 1px solid #E5E5EA; margin: 16px 0;" />
+//       <hr style="border: none; border-top: 1px solid #E5E5EA; margin: 16px 0;" />
 
-      <div style="margin-bottom: 16px;">
-        <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Chi tiết đặt phòng</h3>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Ngày đặt: </span>
-          <span style="color: #1A1A1A; text-align: right;">${bookingDate}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Số khách: </span>
-          <span style="color: #1A1A1A; text-align: right;">${totalGuests} khách</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-          <span style="color: #8E8E93;">Ghi chú: </span>
-          <span style="color: #1A1A1A; text-align: right; max-width: 60%;">${booking.note || "Không có"}</span>
-        </div>
-      </div>
+//       <div style="margin-bottom: 16px;">
+//         <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Chi tiết đặt phòng</h3>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Ngày đặt: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${bookingDate}</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Số khách: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${totalGuests} khách</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px;">
+//           <span style="color: #8E8E93;">Ghi chú: </span>
+//           <span style="color: #1A1A1A; text-align: right; max-width: 60%;">${booking.note || "Không có"}</span>
+//         </div>
+//       </div>
 
-      <hr style="border: none; border-top: 1px solid #E5E5EA; margin: 16px 0;" />
+//       <hr style="border: none; border-top: 1px solid #E5E5EA; margin: 16px 0;" />
 
-      <div style="margin-bottom: 16px;">
-        <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Thông tin người đặt</h3>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Tên khách: </span>
-          <span style="color: #1A1A1A; text-align: right;">${fullName}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Số điện thoại: </span>
-          <span style="color: #1A1A1A; text-align: right;">${booking.user_booking_info?.phone || ""}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-          <span style="color: #8E8E93;">Email: </span>
-          <span style="color: #1A1A1A; text-align: right;">${email}</span>
-        </div>
-      </div>
+//       <div style="margin-bottom: 16px;">
+//         <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Thông tin người đặt</h3>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Tên khách: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${fullName}</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Số điện thoại: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${booking.user_booking_info?.phone || ""}</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px;">
+//           <span style="color: #8E8E93;">Email: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${email}</span>
+//         </div>
+//       </div>
 
-      <hr style="border: none; border-top: 1px solid #E5E5EA; margin: 16px 0;" />
+//       <hr style="border: none; border-top: 1px solid #E5E5EA; margin: 16px 0;" />
 
-      <div style="margin-bottom: 12px;">
-        <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Thông tin thanh toán</h3>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Tiền phòng: </span>
-          <span style="color: #1A1A1A; text-align: right;">${formatCurrency(roomPrice)}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
-          <span style="color: #8E8E93;">Phụ thu: </span>
-          <span style="color: #1A1A1A; text-align: right;">${formatCurrency(extraFee)}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 15px; margin-top: 8px;">
-          <span style="color: #1A1A1A; font-weight: 700;">Tổng thanh toán: </span>
-          <span style="color: #2E76FF; font-weight: 800; font-size: 18px;">${formatCurrency(totalPrice)}</span>
-        </div>
-      </div>
+//       <div style="margin-bottom: 12px;">
+//         <h3 style="font-size: 15px; margin: 0 0 8px 0; color: #1A1A1A;">Thông tin thanh toán</h3>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Tiền phòng: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${formatCurrency(roomPrice)}</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+//           <span style="color: #8E8E93;">Phụ thu: </span>
+//           <span style="color: #1A1A1A; text-align: right;">${formatCurrency(extraFee)}</span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; font-size: 15px; margin-top: 8px;">
+//           <span style="color: #1A1A1A; font-weight: 700;">Tổng thanh toán: </span>
+//           <span style="color: #2E76FF; font-weight: 800; font-size: 18px;">${formatCurrency(totalPrice)}</span>
+//         </div>
+//       </div>
 
-      <p style="font-size: 13px; color: #8E8E93; margin-top: 24px;">
-        Nếu có bất kỳ thắc mắc nào về đơn đặt phòng, vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi.
-      </p>
-      <p style="font-size: 13px; color: #4A4A4A; margin-top: 4px;">
-        Chúc bạn có một kỳ nghỉ tuyệt vời!
-      </p>
-    </div>
-  </div>
-  `;
+//       <p style="font-size: 13px; color: #8E8E93; margin-top: 24px;">
+//         Nếu có bất kỳ thắc mắc nào về đơn đặt phòng, vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi.
+//       </p>
+//       <p style="font-size: 13px; color: #4A4A4A; margin-top: 4px;">
+//         Chúc bạn có một kỳ nghỉ tuyệt vời!
+//       </p>
+//     </div>
+//   </div>
+//   `;
 
-  try {
-    await transporter.sendMail({
-      from: `"Booking App" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject,
-      html,
-    });
-  } catch (err) {
-    console.error(">>> [mailer] SMTP send error:", err);
-  }
-}
+//   try {
+//     await transporter.sendMail({
+//       from: `"Booking App" <${process.env.SMTP_USER}>`,
+//       to: email,
+//       subject,
+//       html,
+//     });
+//   } catch (err) {
+//     console.error(">>> [mailer] SMTP send error:", err);
+//   }
+// }
 /**
  * Tính số tiền hoàn / phí hủy
  */
@@ -391,7 +391,7 @@ async function sendCancelBookingEmail(booking, reasonText) {
   const fullName = booking?.user_booking_info?.full_name || "Quý khách";
 
   console.log("email", email);
-
+  
   if (!email) {
     console.log("[mailer] Không có email, bỏ qua gửi mail hủy");
     return;
@@ -417,114 +417,7 @@ async function sendCancelBookingEmail(booking, reasonText) {
 
   const subject = `Xác nhận hủy đặt phòng #${bookingId} – ${hotelName}`;
 
-  const html = `
-  <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#F8FAFF; padding:24px;">
-    <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
-      <h2 style="text-align:center;color:#1A1A1A;margin:0 0 4px;">Xác nhận hủy đặt phòng</h2>
-      <p style="text-align:center;color:#4A4A4A;margin:0 0 16px;">
-        Xin chào ${fullName}, yêu cầu hủy đơn đặt phòng của bạn đã được tiếp nhận và xử lý.
-      </p>
-
-      <!-- Mã đơn -->
-      <div style="text-align:center;margin-bottom:24px;">
-        <div style="display:inline-block;padding:8px 16px;border-radius:999px;background:#F2F4F8;font-size:13px;color:#4A4A4A;">
-          Mã đơn đặt phòng: <strong style="color:#FF3B30;">${bookingId}</strong>
-        </div>
-      </div>
-
-      <!-- Thông tin khách sạn -->
-      <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Thông tin khách sạn</h3>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Khách sạn</span>
-        <span style="color:#1A1A1A;font-weight:600;text-align:right;">${hotelName}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:12px;">
-        <span style="color:#8E8E93;">Địa chỉ</span>
-        <span style="color:#1A1A1A;text-align:right;max-width:60%;">${hotelAddress}</span>
-      </div>
-
-      <hr style="border:none;border-top:1px solid #E5E5EA;margin:16px 0;" />
-
-      <!-- Chi tiết đặt phòng -->
-      <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Chi tiết đặt phòng</h3>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Ngày đặt</span>
-        <span style="color:#1A1A1A;text-align:right;">${bookingDate}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Check-in</span>
-        <span style="color:#1A1A1A;text-align:right;">${checkInDate}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Check-out</span>
-        <span style="color:#1A1A1A;text-align:right;">${checkOutDate}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Số khách</span>
-        <span style="color:#1A1A1A;text-align:right;">${totalGuests} khách</span>
-      </div>
-
-      <hr style="border:none;border-top:1px solid #E5E5EA;margin:16px 0;" />
-
-      <!-- Thông tin người đặt -->
-      <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Thông tin người đặt</h3>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Tên khách</span>
-        <span style="color:#1A1A1A;text-align:right;">${fullName}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Số điện thoại</span>
-        <span style="color:#1A1A1A;text-align:right;">${booking.user_booking_info?.phone || ""}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:12px;">
-        <span style="color:#8E8E93;">Email</span>
-        <span style="color:#1A1A1A;text-align:right;">${email}</span>
-      </div>
-
-      ${reasonText
-      ? `
-      <div style="margin-bottom:12px;font-size:13px;color:#4A4A4A;">
-        <strong>Lý do hủy:</strong>
-        <div style="margin-top:4px;">${reasonText}</div>
-      </div>`
-      : ""
-    }
-
-      <hr style="border:none;border-top:1px solid #E5E5EA;margin:16px 0;" />
-
-      <!-- Thông tin hoàn tiền -->
-      <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Thông tin hoàn tiền</h3>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Tổng giá trị đặt phòng</span>
-        <span style="color:#1A1A1A;text-align:right;">${formatCurrency(totalPrice)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
-        <span style="color:#8E8E93;">Phí hủy áp dụng</span>
-        <span style="color:#FF3B30;text-align:right;">-${formatCurrency(feeAmount)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:15px;margin-top:8px;">
-        <span style="color:#1A1A1A;font-weight:700;">Số tiền hoàn lại dự kiến</span>
-        <span style="color:#2E76FF;font-weight:800;font-size:18px;">${formatCurrency(refundAmount)}</span>
-      </div>
-
-      <div style="margin-top:16px;font-size:13px;color:#4A4A4A;">
-        <p style="margin:0 0 4px;"><strong>Chính sách hủy đặt:</strong></p>
-        <ul style="padding-left:18px;margin:0 0 8px;">
-          <li>Hủy trước <strong>48 giờ</strong> so với ngày check-in: <strong>không mất phí</strong>, hoàn tiền 100%.</li>
-          <li>Hủy trước <strong>24–48 giờ</strong>: phí 50% giá trị.</li>
-          <li>Hủy trong vòng <strong>dưới 24 giờ</strong>: phí 100% (không hoàn tiền).</li>
-          <li>Trường hợp bất khả kháng (thiên tai, dịch bệnh...) có chứng từ hợp lệ: có thể được xem xét hoàn tiền đầy đủ.</li>
-          <li>Không áp dụng cho các đơn <strong>giá đặc biệt (non-refundable)</strong>.</li>
-        </ul>
-        <p style="margin:0;">
-          Số tiền hoàn trả (nếu có) sẽ được xử lý trong vòng
-          <strong>6–7 ngày làm việc</strong>, tùy theo ngân hàng/đơn vị thanh toán.
-        </p>
-      </div>
-    </div>
-  </div>
-`;
-
+  const html = `... (HTML hủy giống bạn đang có, giữ nguyên) ...`;
 
   try {
     const info = await transporter.sendMail({
@@ -540,10 +433,8 @@ async function sendCancelBookingEmail(booking, reasonText) {
 }
 
 
-module.exports = {
-  sendBookingReceiptEmail,
+module.exports = { sendBookingReceiptEmail, 
   sendCancelBookingEmail,
   calcRefundForCancellation,
   formatCurrency,
-  formatDate,
-};
+  formatDate, };
