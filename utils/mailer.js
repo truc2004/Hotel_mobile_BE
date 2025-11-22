@@ -56,7 +56,7 @@ async function sendBookingReceiptEmail(booking) {
   const totalPrice = booking.total_price || roomPrice + extraFee;
 
   const subject = `Xác nhận đặt phòng #${bookingId} – ${hotelName}`;
-  
+
   const html = `
   <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #F8FAFF; padding: 24px;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
@@ -152,8 +152,8 @@ async function sendBookingReceiptEmail(booking) {
   </div>
   `;
 
-  
-   try {
+
+  try {
     const info = await transporter.sendMail({
       from: `"Booking App" <${process.env.SMTP_USER}>`,
       to: email,
@@ -161,7 +161,7 @@ async function sendBookingReceiptEmail(booking) {
       html,
     });
 
-  
+
   } catch (err) {
     console.error(">>> [mailer] SMTP send error:", err);
   }
@@ -343,13 +343,54 @@ async function sendBookingReceiptEmail(booking) {
     console.error(">>> [mailer] SMTP send error:", err);
   }
 }
+/**
+ * Tính số tiền hoàn / phí hủy
+ */
+function calcRefundForCancellation(booking) {
+  const total = Number(booking.total_price || 0);
+
+  const checkIn = booking.check_in_date
+    ? new Date(booking.check_in_date)
+    : null;
+
+  if (!checkIn || isNaN(checkIn.getTime())) {
+    return {
+      refundAmount: 0,
+      feeAmount: total,
+      ruleText: "Không xác định được thời gian hủy, áp dụng phí 100%.",
+    };
+  }
+
+  const now = new Date();
+  const diffMs = checkIn.getTime() - now.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  let refundPercent = 0;
+
+  if (diffHours >= 48) {
+    refundPercent = 1;
+  } else if (diffHours >= 24) {
+    refundPercent = 0.5;
+  } else {
+    refundPercent = 0;
+  }
+
+  const refundAmount = Math.round(total * refundPercent);
+  const feeAmount = total - refundAmount;
+
+  return { refundAmount, feeAmount };
+}
 
 /**
- * Gửi mail xác nhận HỦY ĐẶT PHÒNG + thông tin hoàn tiền
+ * Gửi mail xác nhận HỦY ĐẶT PHÒNG
  */
 async function sendCancelBookingEmail(booking, reasonText) {
+  console.log("[mailer] sendCancelBookingEmail CALLED, booking_id =", booking?.booking_id);
+
   const email = booking?.user_booking_info?.email;
   const fullName = booking?.user_booking_info?.full_name || "Quý khách";
+
+  console.log("email", email);
 
   if (!email) {
     console.log("[mailer] Không có email, bỏ qua gửi mail hủy");
@@ -384,12 +425,14 @@ async function sendCancelBookingEmail(booking, reasonText) {
         Xin chào ${fullName}, yêu cầu hủy đơn đặt phòng của bạn đã được tiếp nhận và xử lý.
       </p>
 
+      <!-- Mã đơn -->
       <div style="text-align:center;margin-bottom:24px;">
         <div style="display:inline-block;padding:8px 16px;border-radius:999px;background:#F2F4F8;font-size:13px;color:#4A4A4A;">
           Mã đơn đặt phòng: <strong style="color:#FF3B30;">${bookingId}</strong>
         </div>
       </div>
 
+      <!-- Thông tin khách sạn -->
       <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Thông tin khách sạn</h3>
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
         <span style="color:#8E8E93;">Khách sạn</span>
@@ -402,6 +445,7 @@ async function sendCancelBookingEmail(booking, reasonText) {
 
       <hr style="border:none;border-top:1px solid #E5E5EA;margin:16px 0;" />
 
+      <!-- Chi tiết đặt phòng -->
       <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Chi tiết đặt phòng</h3>
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
         <span style="color:#8E8E93;">Ngày đặt</span>
@@ -422,6 +466,7 @@ async function sendCancelBookingEmail(booking, reasonText) {
 
       <hr style="border:none;border-top:1px solid #E5E5EA;margin:16px 0;" />
 
+      <!-- Thông tin người đặt -->
       <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Thông tin người đặt</h3>
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
         <span style="color:#8E8E93;">Tên khách</span>
@@ -436,18 +481,18 @@ async function sendCancelBookingEmail(booking, reasonText) {
         <span style="color:#1A1A1A;text-align:right;">${email}</span>
       </div>
 
-      ${
-        reasonText
-          ? `
+      ${reasonText
+      ? `
       <div style="margin-bottom:12px;font-size:13px;color:#4A4A4A;">
         <strong>Lý do hủy:</strong>
         <div style="margin-top:4px;">${reasonText}</div>
       </div>`
-          : ""
-      }
+      : ""
+    }
 
       <hr style="border:none;border-top:1px solid #E5E5EA;margin:16px 0;" />
 
+      <!-- Thông tin hoàn tiền -->
       <h3 style="font-size:15px;margin:0 0 8px;color:#1A1A1A;">Thông tin hoàn tiền</h3>
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
         <span style="color:#8E8E93;">Tổng giá trị đặt phòng</span>
@@ -473,12 +518,13 @@ async function sendCancelBookingEmail(booking, reasonText) {
         </ul>
         <p style="margin:0;">
           Số tiền hoàn trả (nếu có) sẽ được xử lý trong vòng
-          <strong> 6–7 ngày làm việc</strong>, tùy theo ngân hàng/đơn vị thanh toán.
+          <strong>6–7 ngày làm việc</strong>, tùy theo ngân hàng/đơn vị thanh toán.
         </p>
       </div>
     </div>
   </div>
-  `;
+`;
+
 
   try {
     const info = await transporter.sendMail({
@@ -487,13 +533,17 @@ async function sendCancelBookingEmail(booking, reasonText) {
       subject,
       html,
     });
-    console.log("[mailer] Cancel email sent:", info.messageId);
+    console.log("[mailer] Cancel email sent:");
   } catch (err) {
     console.error("[mailer] sendCancelBookingEmail error:", err);
   }
 }
 
-module.exports = { sendBookingReceiptEmail, sendCancelBookingEmail,
+
+module.exports = {
+  sendBookingReceiptEmail,
+  sendCancelBookingEmail,
   calcRefundForCancellation,
   formatCurrency,
-  formatDate, };
+  formatDate,
+};

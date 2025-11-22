@@ -65,8 +65,6 @@ async function getBookingById(req, res) {
       return res.status(400).json({ message: "booking_id is required" });
     }
 
-    console.log("getBookingById booking_id =", booking_id);
-
     // Tìm theo field booking_id trong Mongo
     const booking = await Booking.findOne({ booking_id });
 
@@ -100,13 +98,12 @@ async function getBookingsByRoom(req, res) {
   }
 }
 
-
 async function cancelBooking(req, res) {
   try {
     const { booking_id } = req.params;
-    const { reason } = req.body; // text lý do từ FE
+    const { reason } = req.body;
 
-    console.log("booking_id =", booking_id);        
+    console.log("booking_id =", booking_id);
 
     if (!booking_id) {
       return res.status(400).json({ message: "booking_id is required" });
@@ -125,11 +122,11 @@ async function cancelBooking(req, res) {
     booking.status = "cancelled";
     await booking.save();
 
-    // Gửi email hủy (không chặn response nếu lỗi mail)
-    if (typeof sendCancelBookingEmail === "function") {
-      sendCancelBookingEmail(booking, reason || "").catch((err) =>
-        console.error("sendCancelBookingEmail error:", err)
-      );
+    try {
+      await sendCancelBookingEmail(booking, reason || "");
+    } catch (err) {
+      console.error("sendCancelBookingEmail error (inner):", err);
+      // không throw tiếp để không làm fail response
     }
 
     return res.json({
@@ -141,6 +138,7 @@ async function cancelBooking(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
 
 module.exports = {
   getBookingsByAccount,
