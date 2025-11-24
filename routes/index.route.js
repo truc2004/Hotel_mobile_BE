@@ -7,6 +7,7 @@ const roomRoute = require('../routes/rooms.route');
 const reviewsRoute = require('../routes/reviews.route');
 const hotelRoute = require('../routes/hotel.route');
 const bookingRoute = require("../routes/booking.route");
+const chatRoute = require("../routes/chat.route");
 
 module.exports = (app) => {
     const PATH_ADMIN = systemConfig.prefixAdmin;
@@ -16,4 +17,5 @@ module.exports = (app) => {
     app.use(PATH_ADMIN+"/reviews", reviewsRoute)
     app.use(PATH_ADMIN+"/hotels", hotelRoute)
     app.use(PATH_ADMIN+"/bookings", bookingRoute);
+    app.use(PATH_ADMIN + "/ai", chatRoute);
 }
